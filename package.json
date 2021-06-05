@@ -4,7 +4,7 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "build": "rollup -cw",
+    "build": "rollup -c",
     "push": "rollup -c --environment PUSH:true",
     "format": "npx prettier --write .",
     "lint": "npx eslint \"src/**/*.ts\"",

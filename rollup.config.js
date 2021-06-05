@@ -6,10 +6,8 @@ import typescript from "rollup-plugin-typescript2"
 
 const REMOTE = "remote"
 
-let config =
-  process.env.PUSH && process.env.PUSH === "true"
-    ? require("./.screeps")[REMOTE]
-    : null
+/* eslint-disable */
+let config = process.env.PUSH && process.env.PUSH === "true" ? require("./.screeps.json")[REMOTE] : null
 
 export default {
   input: "src/main.ts",
@@ -18,6 +16,7 @@ export default {
     format: "cjs",
     sourcemap: true,
   },
+  external: ["lodash"],
   plugins: [
     clear({ targets: ["dist"] }),
     resolve(),
