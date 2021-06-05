@@ -1,0 +1,38 @@
+{
+  "name": "screeps",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.ts",
+  "scripts": {
+    "build": "rollup -cw",
+    "push": "rollup -c --environment PUSH:true",
+    "format": "npx prettier --write .",
+    "lint": "npx eslint \"src/**/*.ts\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install"
+  },
+  "author": "qgaye",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-node-resolve": "^13.0.0",
+    "@typescript-eslint/eslint-plugin": "^4.26.0",
+    "@typescript-eslint/parser": "^4.26.0",
+    "eslint": "^7.28.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^3.4.0",
+    "husky": "^6.0.0",
+    "prettier": "2.3.0",
+    "pretty-quick": "^3.1.0",
+    "rollup": "^2.50.6",
+    "rollup-plugin-clear": "^2.0.7",
+    "rollup-plugin-screeps": "^1.0.1",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "typescript": "^4.3.2"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.170",
+    "@types/screeps": "^3.2.2",
+    "source-map": "^0.6.1"
+  }
+}

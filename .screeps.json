@@ -1,0 +1,10 @@
+{
+  "remote": {
+    "token": "ad337c61-9c52-45fd-a065-52ef02d7b9a5",
+    "protocol": "https",
+    "hostname": "screeps.com",
+    "port": 443,
+    "path": "/",
+    "branch": "default"
+  }
+}
