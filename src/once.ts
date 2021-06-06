@@ -1,17 +1,16 @@
 import _ from "lodash"
-import { BuilderRole, CreepRole, HarvestRole, UpgraderRole } from "./constants/global"
+import { CreepRole } from "@/constants/global"
 
 export const initMemoryVar = (): void => {
   for (const roomName in Game.rooms) {
     const room = Game.rooms[roomName]
-    room.memory.harvestCount = countCreep(roomName, HarvestRole)
-    room.memory.upgraderCount = countCreep(roomName, UpgraderRole)
-    room.memory.builderCount = countCreep(roomName, BuilderRole)
-    console.log(
-      `[Room] '${roomName}': harvestCount: ${room.memory.harvestCount}, upgraderCount: ${room.memory.upgraderCount}, builderCount: ${room.memory.builderCount}`
-    )
+    room.memory.roleCount = {}
+    for (const role in CreepRole) {
+      room.memory.roleCount = { [role as CreepRole]: countCreep(room, role as CreepRole), ...room.memory.roleCount }
+    }
+    console.log(`[Room] '${roomName}': roleCount: ${JSON.stringify(room.memory.roleCount)}`)
   }
 }
 
-const countCreep = (roomName: string, roleName: CreepRole): number =>
-  _.filter(Game.creeps, (o) => o.room.name === roomName && o.memory.role === roleName).length
+const countCreep = (room: Room, role: CreepRole): number =>
+  _.filter(Game.creeps, (creep) => creep.room.name === room.name && creep.memory.role === role).length

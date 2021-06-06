@@ -1,11 +1,17 @@
 export type SpawnName = string
-export type CreepRole = string
+// export type RoleName = string
 export type RoomName = string
 
 export const Room1: RoomName = "E1N45"
 
 export const Spawn1: SpawnName = "Spawn1"
 
-export const HarvestRole: CreepRole = "harvest"
-export const BuilderRole: CreepRole = "builder"
-export const UpgraderRole: CreepRole = "upgrader"
+export enum CreepRole {
+  Harvest = "harvest",
+  Builder = "builder",
+  Upgrader = "upgrader",
+}
+
+// export const HarvestRole: RoleName = "harvest"
+// export const BuilderRole: RoleName = "builder"
+// export const UpgraderRole: RoleName = "upgrader"

@@ -1,6 +1,6 @@
-import { ErrorMapper } from "./utils/ErrorMapper"
-import { Spawn1 } from "./constants/global"
-import { initMemoryVar } from "./once"
+import { ErrorMapper } from "@/utils/ErrorMapper"
+import { Spawn1 } from "@/constants/global"
+import { initMemoryVar } from "@/once"
 
 const run = () => {
   for (const name in Memory.creeps) {
