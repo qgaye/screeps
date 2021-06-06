@@ -1,5 +1,10 @@
 interface CreepMemory {
-  role: string
+  role: CreepRole
+  builder?: BuilderCreepMemory
+}
+
+interface BuilderCreepMemory {
+  isBuilding: boolean
 }
 
 interface RoomMemory {

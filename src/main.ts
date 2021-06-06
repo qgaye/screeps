@@ -1,18 +1,10 @@
 import { ErrorMapper } from "@/utils/ErrorMapper"
-import { Spawn1 } from "@/constants/global"
-import { initMemoryVar } from "@/once"
+import { Spawn1, CreepRole } from "@/constants/global"
+import { consoleRoomsStatus, initMemoryVar } from "@/once"
+import { autoMaintainCreeps } from "./creeps/auto"
 
 const run = () => {
-  for (const name in Memory.creeps) {
-    if (!Game.creeps[name]) {
-      delete Memory.creeps[name]
-      console.log(`[Creep] delete non-existing '${name}' in memory`)
-    }
-  }
-  if (Object.keys(Game.creeps).length <= 3) {
-    Game.spawns[Spawn1].spawnCreep([WORK, CARRY, MOVE], `harvest-creep-${Game.time}`, { memory: { role: "harvest" } })
-    Game.spawns[Spawn1].spawnCreep([WORK, CARRY, MOVE], `upgrader-creep-${Game.time}`, { memory: { role: "upgrader" } })
-  }
+  autoMaintainCreeps()
   for (const name in Game.creeps) {
     const creep = Game.creeps[name]
     if (creep.memory.role === "harvest") {
@@ -52,16 +44,30 @@ const upgrade = (creep: Creep) => {
 }
 
 const build = (creep: Creep) => {
-  const target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES)
-  if (target) {
-    const code = creep.build(target)
-    console.log(`[Build] build return code = ${code}`)
-    if (code == ERR_NOT_IN_RANGE) {
-      creep.moveTo(target)
+  creep.memory.builder = creep.memory.builder || { isBuilding: false }
+  const builderVar = creep.memory.builder
+  if (builderVar.isBuilding && creep.store.energy === 0) {
+    builderVar.isBuilding = false
+  }
+  if (!builderVar.isBuilding && creep.store.energy === creep.store.getCapacity()) {
+    builderVar.isBuilding = true
+  }
+  if (builderVar.isBuilding) {
+    const target = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES)
+    if (target) {
+      const code = creep.build(target)
+      if (code === ERR_NOT_IN_RANGE) {
+        creep.moveTo(target)
+      }
+    }
+  } else {
+    const source = creep.pos.findClosestByRange(FIND_SOURCES)
+    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(source)
     }
   }
 }
 
-initMemoryVar()
+consoleRoomsStatus()
 
 export const loop = ErrorMapper.wrapLoop(() => run())
