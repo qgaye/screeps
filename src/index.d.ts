@@ -1,14 +1,15 @@
 interface CreepMemory {
   role: CreepRole
   builder?: BuilderCreepMemory
+  upgrader?: UpgraderCreepMemory
 }
 
 interface BuilderCreepMemory {
   isBuilding: boolean
 }
 
-interface RoomMemory {
-  roleCount: { [role in CreepRole]?: number }
+interface UpgraderCreepMemory {
+  isUpgrading: boolean
 }
 
 declare enum CreepRole {

@@ -1,11 +1,15 @@
-import * as global from "@/constants/global"
-import { getCreepCountInMemory, setCreepCountInMemeory } from "@/memory/creep"
+import { CreepRole, Spawn1 } from "@/constants/global"
 import { genCreep, getExistCreepsCount } from "."
 
-const FixedCreepCount = {
-  [global.CreepRole.Harvest]: 5,
-  [global.CreepRole.Builder]: 2,
-  [global.CreepRole.Upgrader]: 2,
+interface CreepConfig {
+  count: number
+  body: BodyPartConstant[]
+}
+
+const CreepConfigs: { [role in CreepRole]: CreepConfig } = {
+  [CreepRole.Harvest]: { count: 3, body: [WORK, CARRY, MOVE] },
+  [CreepRole.Builder]: { count: 5, body: [WORK, WORK, CARRY, CARRY, MOVE, MOVE] },
+  [CreepRole.Upgrader]: { count: 2, body: [WORK, WORK, CARRY, CARRY, MOVE, MOVE] },
 }
 
 export const autoMaintainCreeps = (): void => {
@@ -14,9 +18,9 @@ export const autoMaintainCreeps = (): void => {
 }
 
 const autoCreateCreeps = (roomName: string) => {
-  Object.values(global.CreepRole).forEach((role) => {
-    for (let i = getExistCreepsCount(roomName, role); i < FixedCreepCount[role]; i++) {
-      const isSuc = genCreep(global.Spawn1, role, [WORK, CARRY, MOVE])
+  Object.values(CreepRole).forEach((role) => {
+    for (let i = getExistCreepsCount(roomName, role); i < CreepConfigs[role].count; i++) {
+      const isSuc = genCreep(Spawn1, role, CreepConfigs[role].body)
       if (!isSuc) {
         break
       }

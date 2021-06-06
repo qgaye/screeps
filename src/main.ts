@@ -1,17 +1,17 @@
 import { ErrorMapper } from "@/utils/ErrorMapper"
-import { Spawn1, CreepRole } from "@/constants/global"
-import { consoleRoomsStatus, initMemoryVar } from "@/once"
+import { CreepRole, Spawn1 } from "@/constants/global"
+import { consoleRoomsStatus } from "@/once"
 import { autoMaintainCreeps } from "./creeps/auto"
 
 const run = () => {
   autoMaintainCreeps()
   for (const name in Game.creeps) {
     const creep = Game.creeps[name]
-    if (creep.memory.role === "harvest") {
+    if (creep.memory.role === CreepRole.Harvest) {
       harvest(creep)
-    } else if (creep.memory.role === "upgrader") {
+    } else if (creep.memory.role === CreepRole.Upgrader) {
       upgrade(creep)
-    } else if (creep.memory.role === "builder") {
+    } else if (creep.memory.role === CreepRole.Builder) {
       build(creep)
     }
   }
@@ -20,25 +20,45 @@ const run = () => {
 const harvest = (creep: Creep) => {
   if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
     const sources = creep.room.find(FIND_SOURCES)
-    if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(sources[0])
+    const sourcePos = parseInt(creep.name.charAt(creep.name.length - 1)) % 2
+    if (creep.harvest(sources[sourcePos]) === ERR_NOT_IN_RANGE) {
+      creep.moveTo(sources[sourcePos])
     }
   } else {
-    if (creep.transfer(Game.spawns[Spawn1], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+    const targets = creep.room.find(FIND_STRUCTURES, {
+      filter: (structure) => {
+        return (
+          (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+          (structure.store.getFreeCapacity() ?? 0) > 0
+        )
+      },
+    })
+    if (targets.length == 0) {
+      return
+    }
+    if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
       creep.moveTo(Game.spawns[Spawn1])
     }
   }
 }
 
 const upgrade = (creep: Creep) => {
-  if (creep.store[RESOURCE_ENERGY] === 0) {
-    const sources = creep.room.find(FIND_SOURCES)
-    if (creep.harvest(sources[0]) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(sources[0])
-    }
-  } else {
+  creep.memory.upgrader = creep.memory.upgrader || { isUpgrading: false }
+  const upgraderVar = creep.memory.upgrader
+  if (upgraderVar.isUpgrading && creep.store.energy === 0) {
+    upgraderVar.isUpgrading = false
+  }
+  if (!upgraderVar.isUpgrading && creep.store.getFreeCapacity() <= 0) {
+    upgraderVar.isUpgrading = true
+  }
+  if (upgraderVar.isUpgrading) {
     if (creep.upgradeController(creep.room.controller) === ERR_NOT_IN_RANGE) {
       creep.moveTo(creep.room.controller)
+    }
+  } else {
+    const source = creep.pos.findClosestByRange(FIND_SOURCES)
+    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(source)
     }
   }
 }
