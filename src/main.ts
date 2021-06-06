@@ -2,6 +2,7 @@ import { ErrorMapper } from "@/utils/ErrorMapper"
 import { CreepRole } from "@/constants/global"
 import { consoleRoomsStatus } from "@/once"
 import { autoMaintainCreeps } from "./creeps/auto"
+import _ from "lodash"
 
 const run = () => {
   autoMaintainCreeps()
@@ -13,21 +14,27 @@ const run = () => {
       upgrade(creep)
     } else if (creep.memory.role === CreepRole.Builder) {
       build(creep)
+    } else if (creep.memory.role === CreepRole.Repairer) {
+      repair(creep)
     }
   }
 }
 
 const harvest = (creep: Creep) => {
-  if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
-    const sources = creep.room.find(FIND_SOURCES)
-    if (creep.harvest(sources[1]) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(sources[1])
-    }
-  } else {
+  creep.memory.harvest = creep.memory.harvest || { isTransfering: false }
+  if (creep.memory.harvest.isTransfering && creep.store.energy === 0) {
+    creep.memory.harvest.isTransfering = false
+  }
+  if (!creep.memory.harvest.isTransfering && creep.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
+    creep.memory.harvest.isTransfering = true
+  }
+  if (creep.memory.harvest.isTransfering) {
     const targets = creep.room.find(FIND_STRUCTURES, {
       filter: (structure) => {
         return (
-          (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
+          (structure.structureType === STRUCTURE_EXTENSION ||
+            structure.structureType === STRUCTURE_SPAWN ||
+            structure.structureType === STRUCTURE_CONTAINER) &&
           (structure.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) > 0
         )
       },
@@ -35,8 +42,17 @@ const harvest = (creep: Creep) => {
     if (targets.length == 0) {
       return
     }
-    if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(targets[0])
+    const nonContainerTargets = _.filter(targets, (target) => target.structureType !== STRUCTURE_CONTAINER)
+    const target = nonContainerTargets.length > 0 ? nonContainerTargets[0] : targets[0]
+    if (creep.transfer(target, RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
+      creep.moveTo(target)
+    }
+  } else {
+    const sources = creep.room.find(FIND_SOURCES)
+    // TODO 取模以判断去哪个source
+    const sourcePos = parseInt(creep.name.charAt(creep.name.length - 1)) % 2
+    if (creep.harvest(sources[sourcePos]) === ERR_NOT_IN_RANGE) {
+      creep.moveTo(sources[sourcePos])
     }
   }
 }
@@ -77,6 +93,34 @@ const build = (creep: Creep) => {
       const code = creep.build(target)
       if (code === ERR_NOT_IN_RANGE) {
         creep.moveTo(target)
+      }
+    }
+  } else {
+    const source = creep.pos.findClosestByRange(FIND_SOURCES)
+    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(source)
+    }
+  }
+}
+
+const repair = (creep: Creep) => {
+  creep.memory.repairer = creep.memory.repairer || { isRepairing: false }
+  if (creep.memory.repairer.isRepairing && creep.store.energy === 0) {
+    creep.memory.repairer.isRepairing = false
+  }
+  if (!creep.memory.repairer.isRepairing && creep.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
+    creep.memory.repairer.isRepairing = true
+  }
+  if (creep.memory.repairer.isRepairing) {
+    const targets = creep.room
+      .find(FIND_STRUCTURES, {
+        filter: (structure) => structure.hits < structure.hitsMax,
+      })
+      .sort((a, b) => a.hits - b.hits)
+
+    if (targets.length > 0) {
+      if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(targets[0])
       }
     }
   } else {

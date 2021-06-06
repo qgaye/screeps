@@ -1,6 +1,5 @@
 import _ from "lodash"
 import { CreepRole } from "@/constants/global"
-import { setCreepCountInMemeory } from "./memory/creep"
 import { getExistCreepsCount } from "./creeps"
 
 // export const initMemoryVar = (): void => {

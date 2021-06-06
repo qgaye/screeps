@@ -1,4 +1,5 @@
 import _ from "lodash"
+import { CreepRole } from "@/constants/global"
 
 export const genCreep = (spawn: string, role: CreepRole, body: BodyPartConstant[]): boolean => {
   if (Game.spawns[spawn].spawning) {
