@@ -7,7 +7,7 @@ interface CreepConfig {
 }
 
 const CreepConfigs: { [role in CreepRole]: CreepConfig } = {
-  [CreepRole.Harvest]: { count: 3, body: [WORK, CARRY, MOVE] },
+  [CreepRole.Harvest]: { count: 5, body: [WORK, CARRY, MOVE] },
   [CreepRole.Builder]: { count: 5, body: [WORK, WORK, CARRY, CARRY, MOVE, MOVE] },
   [CreepRole.Upgrader]: { count: 2, body: [WORK, WORK, CARRY, CARRY, MOVE, MOVE] },
 }

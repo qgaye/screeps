@@ -1,5 +1,5 @@
 import { ErrorMapper } from "@/utils/ErrorMapper"
-import { CreepRole, Spawn1 } from "@/constants/global"
+import { CreepRole } from "@/constants/global"
 import { consoleRoomsStatus } from "@/once"
 import { autoMaintainCreeps } from "./creeps/auto"
 
@@ -20,16 +20,15 @@ const run = () => {
 const harvest = (creep: Creep) => {
   if (creep.store[RESOURCE_ENERGY] < creep.store.getCapacity()) {
     const sources = creep.room.find(FIND_SOURCES)
-    const sourcePos = parseInt(creep.name.charAt(creep.name.length - 1)) % 2
-    if (creep.harvest(sources[sourcePos]) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(sources[sourcePos])
+    if (creep.harvest(sources[1]) === ERR_NOT_IN_RANGE) {
+      creep.moveTo(sources[1])
     }
   } else {
     const targets = creep.room.find(FIND_STRUCTURES, {
       filter: (structure) => {
         return (
           (structure.structureType === STRUCTURE_EXTENSION || structure.structureType === STRUCTURE_SPAWN) &&
-          (structure.store.getFreeCapacity() ?? 0) > 0
+          (structure.store.getFreeCapacity(RESOURCE_ENERGY) ?? 0) > 0
         )
       },
     })
@@ -37,7 +36,7 @@ const harvest = (creep: Creep) => {
       return
     }
     if (creep.transfer(targets[0], RESOURCE_ENERGY) === ERR_NOT_IN_RANGE) {
-      creep.moveTo(Game.spawns[Spawn1])
+      creep.moveTo(targets[0])
     }
   }
 }
@@ -48,7 +47,7 @@ const upgrade = (creep: Creep) => {
   if (upgraderVar.isUpgrading && creep.store.energy === 0) {
     upgraderVar.isUpgrading = false
   }
-  if (!upgraderVar.isUpgrading && creep.store.getFreeCapacity() <= 0) {
+  if (!upgraderVar.isUpgrading && creep.store.getFreeCapacity(RESOURCE_ENERGY) <= 0) {
     upgraderVar.isUpgrading = true
   }
   if (upgraderVar.isUpgrading) {
