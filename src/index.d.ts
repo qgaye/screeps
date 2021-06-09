@@ -6,6 +6,19 @@ interface CreepMemory {
   repairer?: RepairerCreepMemory
 }
 
+declare enum CreepRole {
+  Harvest = "harvest",
+  Builder = "builder",
+  Upgrader = "upgrader",
+  Repairer = "repairer",
+  FixedWorker = "fixedWorker",
+  FixedUpgrader = "fixedUpgrader",
+}
+
+interface SpawnMemory {
+  isPosAllSources: boolean
+}
+
 interface BuilderCreepMemory {
   isBuilding: boolean
 }
@@ -20,11 +33,4 @@ interface HarvestCreepMemory {
 
 interface RepairerCreepMemory {
   isRepairing: boolean
-}
-
-declare enum CreepRole {
-  Harvest = "harvest",
-  Builder = "builder",
-  Upgrader = "upgrader",
-  Repairer = "repairer",
 }

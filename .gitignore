@@ -2,3 +2,5 @@
 node_modules
 dist
 .screeps.json
+.screeps.yaml
+.screeps-multimeter.history

@@ -7,4 +7,6 @@ export enum CreepRole {
   Builder = "builder",
   Upgrader = "upgrader",
   Repairer = "repairer",
+  FixedWorker = "fixedWorker",
+  FixedUpgrader = "fixedUpgrader",
 }

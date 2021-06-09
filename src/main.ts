@@ -1,11 +1,12 @@
 import { ErrorMapper } from "@/utils/ErrorMapper"
 import { CreepRole } from "@/constants/global"
 import { consoleRoomsStatus } from "@/once"
-import { autoMaintainCreeps } from "./creeps/auto"
+import { autoMaintainCreeps, autoPosRoad } from "@/creeps/auto"
 import _ from "lodash"
 
 const run = () => {
   autoMaintainCreeps()
+  Object.keys(Game.spawns).forEach(autoPosRoad)
   for (const name in Game.creeps) {
     const creep = Game.creeps[name]
     if (creep.memory.role === CreepRole.Harvest) {
@@ -96,10 +97,7 @@ const build = (creep: Creep) => {
       }
     }
   } else {
-    const source = creep.pos.findClosestByRange(FIND_SOURCES)
-    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-      creep.moveTo(source)
-    }
+    getEnergy(creep)
   }
 }
 
@@ -112,11 +110,11 @@ const repair = (creep: Creep) => {
     creep.memory.repairer.isRepairing = true
   }
   if (creep.memory.repairer.isRepairing) {
-    const targets = creep.room
-      .find(FIND_STRUCTURES, {
-        filter: (structure) => structure.hits < structure.hitsMax,
-      })
-      .sort((a, b) => a.hits - b.hits)
+    // TODO 暂时先修不修墙
+    const targets = creep.room.find(FIND_STRUCTURES, {
+      filter: (structure) => structure.structureType !== STRUCTURE_WALL && structure.hits < structure.hitsMax,
+    })
+    // .sort((a, b) => a.hits - b.hits)
 
     if (targets.length > 0) {
       if (creep.repair(targets[0]) == ERR_NOT_IN_RANGE) {
@@ -124,10 +122,54 @@ const repair = (creep: Creep) => {
       }
     }
   } else {
-    const source = creep.pos.findClosestByRange(FIND_SOURCES)
-    if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-      creep.moveTo(source)
+    const target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+      filter: (structure) => structure.structureType === STRUCTURE_CONTAINER && structure.store.energy > 0,
+    })
+    if (target) {
+      if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(target)
+      }
+    } else {
+      const source = creep.pos.findClosestByRange(FIND_SOURCES)
+      if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+        creep.moveTo(source)
+      }
     }
+  }
+}
+
+const fixedUpgrade = (creep: Creep) => {
+  if (creep.store.getFreeCapacity(RESOURCE_ENERGY) > 0) {
+    getEnergyFromContainer(creep)
+  }
+  const code = creep.upgradeController(creep.room.controller)
+  if (code !== OK) {
+    console.log(`[FixedUpgrader] failed to upgrade controller, err code = ${code}`)
+  }
+}
+
+const getEnergyFromContainer = (creep: Creep): boolean => {
+  const target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
+    filter: (structure) => structure.structureType === STRUCTURE_CONTAINER && structure.store.energy > 0,
+  })
+  if (target) {
+    if (creep.withdraw(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+      creep.moveTo(target)
+    }
+  }
+  return target !== null
+}
+
+const getEnergyFromSource = (creep: Creep) => {
+  const source = creep.pos.findClosestByRange(FIND_SOURCES)
+  if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
+    creep.moveTo(source)
+  }
+}
+
+const getEnergy = (creep: Creep) => {
+  if (!getEnergyFromContainer(creep)) {
+    getEnergyFromSource(creep)
   }
 }
 

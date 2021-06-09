@@ -1,4 +1,5 @@
 # Screeps
 
-- [] 自动创建 creep
-- [] creep 分工
+## tool
+
+[screeps-multimeter](https://github.com/screepers/screeps-multimeter): access Screeps console in terminal
